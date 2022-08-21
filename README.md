@@ -1,4 +1,26 @@
-# doom-nano
+This fork is intended to be used on a ```Logitech G413``` keyboard which features a ```stm32l100r8``` MCU with the ```Arduino``` framework.
+### Wiring 
+| Test point | Description | Notes                       |
+|------------|-------------|-----------------------------|
+| TP36       | NRST        |                             |
+| TP53       | DIO         | has 'DIO' on the silkscreen |
+| TP54       | CLK         | has 'CLK' on the silkscreen |
+| TP34       | VCC         | 3.3V                        |
+| TP37       | GND         |                             |
+| TP2        | SCL         | Software I2C                |
+| TP3        | SDA         | Software I2C                |
+![](/images/G413.png)
+### Execution
+Hook up a STLINK on TP36,TP53,TP54 pins then dump the firmware off the keyboard by using the STM32CubeProg tool.
+Then load the arduino sketch and flash!
+Do not continue if the keyboard has Level-2 security implemented (this will be shown in STM32CubeProg tool).
+NOTE: This will erase the keyboard! so be very cautious when doing this.
+Hook up SH1106 LCD to TP2,TP3,TP34,TP37
+### Misc 
+A ROM dump of the keyboard can found under the ROM folder which contains the code running on a stock G413 that can be useful to flash the keyboard without any external tools! psst QMK community
+### Resources
+resource which helped me port to this keyboard: https://geekhack.org/index.php?topic=113813.0
+## doom-nano
 A 3d raycast engine for Arduino
 
 ![](/images/screen-1.jpg?raw=true)

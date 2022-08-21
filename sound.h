@@ -32,22 +32,27 @@ uint16_t snd_ptr = 0;
 uint8_t snd_len = 0;
 
 void sound_init() {
+  /*
   pinMode(SOUND_PIN, OUTPUT);
 
   TCCR2A = (1 << WGM21); // CTC
   TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20); // prescaler 1024
   OCR2A = 112 - 1; // 16000000 / 1024 / 112 -> 139,5 Hz
   TIMSK2 = (1 << OCIE2A);
+  */
 }
 
 void playSound(const uint8_t* snd, uint8_t len) {
+  /*
   snd_ptr = reinterpret_cast<uint16_t>(snd);
   snd_len = len;
   sound = true;
+   */
 }
 
 // Set the frequency that we will get on pin OCR1A
 void setFrequency(uint16_t freq) {
+  /*
   uint32_t requiredDivisor = (F_CPU / 2) / (uint32_t)freq;
 
   uint16_t prescalerVal;
@@ -70,16 +75,19 @@ void setFrequency(uint16_t freq) {
   }
 
   uint16_t top = ((requiredDivisor + (prescalerVal / 2)) / prescalerVal) - 1;
-  TCCR1A = _BV(COM1A0) /*+ _BV(COM1B0)*/;
+  TCCR1A = _BV(COM1A0);
   TCCR1B = (1 << WGM12) | prescalerBits;  // CTC
   TCCR1C = _BV(FOC1A);
   OCR1A = top;
+  */
 }
 
 void off() {
+  /*
   TCCR1A = 0;
+  */
 }
-
+/*
 ISR(TIMER2_COMPA_vect) {
   if (sound) {
     if (idx++ < snd_len) {
@@ -92,5 +100,5 @@ ISR(TIMER2_COMPA_vect) {
     }
   }
 }
-
+*/
 #endif

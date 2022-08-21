@@ -1,7 +1,7 @@
 /* 
 todo: Moving this to CPP looks like it takes more Flash storage. Figure out why.
 */
-#include "SSD1306.h"
+#include "Adafruit_SH1106.h"
 #include "constants.h"
 
 // Reads a char from an F() string
@@ -25,7 +25,7 @@ void drawText(int8_t x, int8_t y, char *txt, uint8_t space = 1);
 void drawText(int8_t x, int8_t y, const __FlashStringHelper txt, uint8_t space = 1);
 
 // Initialize screen. Following line is for OLED 128x64 connected by I2C
-Adafruit_SSD1306<SCREEN_WIDTH, SCREEN_HEIGHT> display;
+Adafruit_SH1106 display(0,0);
 
 // FPS control
 double delta = 1;
@@ -43,10 +43,7 @@ uint8_t zbuffer[ZBUFFER_SIZE];
 void setupDisplay() {
   // Setup display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Fixed from 0x3D
-    Serial.println(F("SSD1306 allocation failed"));
-    while (1); // Don't proceed, loop forever
-  }
+   display.begin(SH1106_SWITCHCAPVCC, 0x3C);
 
 #ifdef OPTIMIZE_SSD1306
   display_buf = display.getBuffer();

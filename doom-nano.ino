@@ -6,11 +6,46 @@
 #include "types.h"
 #include "display.h"
 #include "sound.h"
-
+#include <Adafruit_GFX.h>
 // Useful macros
 #define swap(a, b)            do { typeof(a) temp = a; a = b; b = temp; } while (0)
 #define sign(a, b)            (double) (a > b ? 1 : (b > a ? -1 : 0))
 
+extern "C" void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+  RCC_OscInitStruct.PLL.PLLDIV = RCC_PLL_DIV3;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
 // general
 uint8_t scene = INTRO;
 bool exit_scene = false;
@@ -87,7 +122,6 @@ void spawnEntity(uint8_t type, uint8_t x, uint8_t y) {
   }
 
   // todo: read static entity status
-  
   switch (type) {
     case E_ENEMY:
       entity[num_entities] = create_enemy(x, y);
@@ -206,7 +240,6 @@ UID detectCollision(const uint8_t level[], Coords *pos, double relative_x, doubl
 // Shoot
 void fire() {
   playSound(shoot_snd, SHOOT_SND_LEN);
-
   for (uint8_t i = 0; i < num_entities; i++) {
     // Shoot only ALIVE enemies
     if (uid_get_type(entity[i].uid) != E_ENEMY || entity[i].state == S_DEAD || entity[i].state == S_HIDDEN) {
@@ -486,7 +519,7 @@ uint8_t sortEntities() {
     //shrink factor 1.3
     gap = (gap * 10) / 13;
     if (gap == 9 || gap == 10) gap = 11;
-    if (gap < 1) gap = 1;
+    if (gap < 1) {gap = 1; return 0;}
     swapped = false;
     for (uint8_t i = 0; i < num_entities - gap; i++)
     {
@@ -674,12 +707,9 @@ void loopIntro() {
   delay(1000);
   drawText(SCREEN_WIDTH / 2 - 25, SCREEN_HEIGHT * .8, F("PRESS FIRE"));
   display.display();
-
   // wait for fire
   while (!exit_scene) {
-    #ifdef SNES_CONTROLLER
-    getControllerData();
-    #endif
+    input_matrix_data();
     if (input_fire()) jumpTo(GAME_PLAY);
   };
 }
@@ -701,11 +731,12 @@ void loopGamePlay() {
     fps();
 
     // Clear only the 3d view
-    memset(display_buf, 0, SCREEN_WIDTH * (RENDER_HEIGHT / 8));
-
-    #ifdef SNES_CONTROLLER
-    getControllerData();
+    #ifdef OPTIMIZE_SSD1306
+     memset(display_buf, 0, SCREEN_WIDTH * (RENDER_HEIGHT / 8));
+    #else
+     display.clearRect(0,0,SCREEN_WIDTH,(RENDER_HEIGHT));
     #endif
+    input_matrix_data();
 
     // If the player is alive
     if (player.health > 0) {
@@ -757,6 +788,7 @@ void loopGamePlay() {
       if (gun_pos > GUN_TARGET_POS) {
         // Right after fire
         gun_pos -= 1;
+        analogWrite(PB7,map(gun_pos, GUN_SHOT_POS, GUN_TARGET_POS, 255, 0));
       } else if (gun_pos < GUN_TARGET_POS) {
         // Showing up
         gun_pos += 2;
@@ -823,11 +855,8 @@ void loopGamePlay() {
     display.display();
 
     // Exit routine
-    #ifdef SNES_CONTROLLER
-    if (input_start()) {
-    #else
-    if (input_left() && input_right()) {
-    #endif
+    if (input_exit()) {
+      HAL_NVIC_SystemReset(); //display has some issues
       jumpTo(INTRO);
     }
   } while (!exit_scene);

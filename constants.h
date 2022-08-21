@@ -1,28 +1,24 @@
 #ifndef _constants_h
 #define _constants_h
 
-// Key pinout
-#define USE_INPUT_PULLUP
-#define K_LEFT              6
-#define K_RIGHT             7
-#define K_UP                8
-#define K_DOWN              3
-#define K_FIRE              10
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#define max(a,b) ((a) > (b) ? (a) : (b))
 
-// SNES Controller
-// uncomment following line to enable snes controller support
-// #define SNES_CONTROLLER
-constexpr uint8_t DATA_CLOCK   = 11;
-constexpr uint8_t DATA_LATCH   = 12;
-constexpr uint8_t DATA_SERIAL  = 13;
+#define  SW_I2C_WAIT_TIME  6
+#define   GPIO_SW_I2C1_SCL			GPIOC
+#define   GPIO_SW_I2C1_SDA			GPIOC
+#define   GPIO_SW_I2C1_SCL_PIN		GPIO_PIN_13
+#define   GPIO_SW_I2C1_SDA_PIN		GPIO_PIN_14
+#define SW_I2C1		1
+
 
 // Sound
 constexpr uint8_t SOUND_PIN   = 9; // do not change, belongs to used timer
 
 // GFX settings
-#define OPTIMIZE_SSD1306                // Optimizations for SSD1366 displays
+//#define OPTIMIZE_SSD1306                // Optimizations for SSD1366 displays
 
-#define FRAME_TIME          66.666666   // Desired time per frame in ms (66.666666 is ~15 fps)
+#define FRAME_TIME          90.909091    // Desired time per frame in ms (66.666666 is ~15 fps)
 #define RES_DIVIDER         2           // Higher values will result in lower horizontal resolution when rasterize and lower process and memory usage
                                         // Lower will require more process and memory, but looks nicer
 #define Z_RES_DIVIDER       2           // Zbuffer resolution divider. We sacrifice resolution to save memory
