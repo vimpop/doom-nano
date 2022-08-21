@@ -9,6 +9,7 @@ This fork is intended to be used on a ```Logitech G413``` keyboard which feature
 | TP37       | GND         |                             |
 | TP2        | SCL         | Software I2C                |
 | TP3        | SDA         | Software I2C                |
+
 ![](/images/G413.png)
 ### Execution
 Hook up a STLINK on TP36,TP53,TP54 pins then dump the firmware off the keyboard by using the STM32CubeProg tool.
